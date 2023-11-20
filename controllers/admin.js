@@ -54,7 +54,14 @@ exports.postEditProduct = (req, res, next) => {
     updatedPrice
   );
 
-  updatedProduct.save();
+  updatedProduct.save(); // best it would be to have a callback to redirect only when it is done
+  res.redirect('/admin/products');
+};
+
+exports.postDeleteProduct = (req, res, next) => {
+  const { productId } = req.body;
+  Product.deleteById(productId); // best it would be to have a callback to redirect only when it is done
+
   res.redirect('/admin/products');
 };
 
