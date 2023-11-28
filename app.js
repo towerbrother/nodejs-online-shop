@@ -9,6 +9,9 @@ const errorController = require('./controllers/error');
 const environment = require('./util/environment');
 const sequelize = require('./util/database');
 
+const Product = require('./models/product');
+const User = require('./models/user');
+
 const app = express();
 
 const PORT = environment.port || 3001;
@@ -24,8 +27,11 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
+Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' }); // user creates a product
+User.hasMany(Product);
+
 sequelize
-  .sync()
+  .sync({ force: true }) // ONLY DEVELOPMENT
   .then(() => {
     // we want to run our application only if the connection to the DB is successful
     app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
