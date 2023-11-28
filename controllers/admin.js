@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const User = require('../models/user');
 
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
@@ -10,7 +11,12 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, imageUrl, price, description } = req.body;
-  Product.create({ title, price, imageUrl, description })
+  /**
+   * Having set a "hasMany" reletionship between User and Product
+   * Sequelize automatically creates this static method for creating products
+   */
+  req.user
+    .createProduct({ title, price, imageUrl, description })
     .then(() => {
       console.log('Product created!');
       res.redirect('/admin/products');
@@ -26,11 +32,15 @@ exports.getEditProduct = (req, res, next) => {
   }
 
   const productId = req.params.productId;
-  Product.findByPk(productId)
-    .then((product) => {
-      if (!product) {
+  req.user
+    .getProducts({ where: { id: productId } })
+    // Product.findByPk(productId)
+    .then((products) => {
+      if (!products || products.length === 0) {
         return res.redirect('/'); // best would be error handling
       }
+
+      const product = products[0];
 
       res.render('admin/edit-product', {
         pageTitle: 'Edit Product',
@@ -80,7 +90,8 @@ exports.postDeleteProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.findAll()
+  req.user
+    .getProducts()
     .then((products) => {
       res.render('admin/products', {
         prods: products,

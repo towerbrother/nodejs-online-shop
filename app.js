@@ -28,11 +28,6 @@ app.set('views', 'views');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/admin', adminRoutes);
-app.use(shopRoutes);
-
-app.use(errorController.get404);
-
 app.use((req, res, next) => {
   User.findByPk(1)
     .then((user) => {
@@ -41,6 +36,11 @@ app.use((req, res, next) => {
     })
     .catch((err) => console.error(err));
 });
+
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
+
+app.use(errorController.get404);
 
 Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' }); // user creates a product
 User.hasMany(Product);
