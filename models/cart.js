@@ -1,75 +1,90 @@
-const fs = require('fs');
-const path = require('path');
+const Sequelize = require('sequelize');
 
-const p = path.join(path.dirname(require.main.filename), 'data', 'cart.json');
+const sequelize = require('../util/database');
 
-module.exports = class Cart {
-  static addProduct(id, price) {
-    // fetch previous cart
-    fs.readFile(p, (err, fileContent) => {
-      let cart = { products: [], totalPrice: 0 };
-      if (!err) {
-        cart = JSON.parse(fileContent);
-      }
+const Cart = sequelize.define('cart', {
+  id: {
+    type: Sequelize.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true,
+  },
+});
 
-      // analyse the cart content checking for same product
-      const existingProductIndex = cart.products.findIndex(
-        (product) => product.id === id
-      );
-      const existingProduct = cart.products[existingProductIndex];
+module.exports = Cart;
 
-      let updatedProduct;
-      // add new product / increase quantity
-      if (existingProduct) {
-        updatedProduct = { ...existingProduct, qty: existingProduct.qty + 1 };
-        cart.products = [...cart.products];
-        cart.products[existingProductIndex] = updatedProduct;
-      } else {
-        updatedProduct = { id, qty: 1 };
-        cart.products.push(updatedProduct);
-      }
+// const fs = require('fs');
+// const path = require('path');
 
-      // increase cart total price
-      cart.totalPrice = cart.totalPrice + +price;
+// const p = path.join(path.dirname(require.main.filename), 'data', 'cart.json');
 
-      // save new cart in file
-      fs.writeFile(p, JSON.stringify(cart), (err) => {
-        console.log(err);
-      });
-    });
-  }
+// module.exports = class Cart {
+//   static addProduct(id, price) {
+//     // fetch previous cart
+//     fs.readFile(p, (err, fileContent) => {
+//       let cart = { products: [], totalPrice: 0 };
+//       if (!err) {
+//         cart = JSON.parse(fileContent);
+//       }
 
-  static deleteProduct(id, productPrice) {
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
-        return;
-      }
-      const updatedCart = { ...JSON.parse(fileContent) };
-      const product = updatedCart.products.find((prod) => prod.id === id);
-      if (!product) {
-        return;
-      }
-      const productQty = product.qty;
-      updatedCart.products = updatedCart.products.filter(
-        (prod) => prod.id !== id
-      );
-      updatedCart.totalPrice =
-        updatedCart.totalPrice - productPrice * productQty;
+//       // analyse the cart content checking for same product
+//       const existingProductIndex = cart.products.findIndex(
+//         (product) => product.id === id
+//       );
+//       const existingProduct = cart.products[existingProductIndex];
 
-      fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
-        console.log(err);
-      });
-    });
-  }
+//       let updatedProduct;
+//       // add new product / increase quantity
+//       if (existingProduct) {
+//         updatedProduct = { ...existingProduct, qty: existingProduct.qty + 1 };
+//         cart.products = [...cart.products];
+//         cart.products[existingProductIndex] = updatedProduct;
+//       } else {
+//         updatedProduct = { id, qty: 1 };
+//         cart.products.push(updatedProduct);
+//       }
 
-  static getCart(cb) {
-    fs.readFile(p, (err, fileContent) => {
-      const cart = JSON.parse(fileContent);
-      if (err) {
-        cb(null);
-      } else {
-        cb(cart);
-      }
-    });
-  }
-};
+//       // increase cart total price
+//       cart.totalPrice = cart.totalPrice + +price;
+
+//       // save new cart in file
+//       fs.writeFile(p, JSON.stringify(cart), (err) => {
+//         console.log(err);
+//       });
+//     });
+//   }
+
+//   static deleteProduct(id, productPrice) {
+//     fs.readFile(p, (err, fileContent) => {
+//       if (err) {
+//         return;
+//       }
+//       const updatedCart = { ...JSON.parse(fileContent) };
+//       const product = updatedCart.products.find((prod) => prod.id === id);
+//       if (!product) {
+//         return;
+//       }
+//       const productQty = product.qty;
+//       updatedCart.products = updatedCart.products.filter(
+//         (prod) => prod.id !== id
+//       );
+//       updatedCart.totalPrice =
+//         updatedCart.totalPrice - productPrice * productQty;
+
+//       fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
+//         console.log(err);
+//       });
+//     });
+//   }
+
+//   static getCart(cb) {
+//     fs.readFile(p, (err, fileContent) => {
+//       const cart = JSON.parse(fileContent);
+//       if (err) {
+//         cb(null);
+//       } else {
+//         cb(cart);
+//       }
+//     });
+//   }
+// };
