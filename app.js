@@ -66,10 +66,14 @@ sequelize
       return User.create({ name: 'Tower', email: 'tower@email.com' });
     }
 
-    return Promise.resolve(user);
+    return Promise.resolve(user); // not strictly necessary
   })
   .then((user) => {
-    console.log(`User ${user}`);
+    console.log(`Created User ${user}`);
+    return user.createCart();
+  })
+  .then((cart) => {
+    console.log(`Created cart`);
     // we want to run our application only if the connection to the DB is successful
     // and if a user is there - currently only dummy user with no authentication
     app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
