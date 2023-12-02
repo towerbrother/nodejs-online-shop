@@ -1,5 +1,4 @@
 const Product = require('../models/product');
-const Cart = require('../models/cart');
 
 exports.getIndex = (req, res, next) => {
   Product.findAll()
@@ -109,17 +108,44 @@ exports.postCartDeleteProduct = (req, res, next) => {
 };
 
 exports.getOrders = (req, res, next) => {
-  res.render('shop/orders', {
-    pageTitle: 'Your Orders',
-    path: '/orders',
-  });
+  req.user
+    .getOrders({ include: ['products'] }) // it instructs sequelize to return an array of products within the order
+    .then((orders) => {
+      res.render('shop/orders', {
+        pageTitle: 'Your Orders',
+        path: '/orders',
+        orders,
+      });
+    })
+    .catch((err) => console.error(err));
 };
 
-exports.getCheckout = (req, res, next) => {
-  Product.fetchAll((products) => {
-    res.render('shop/checkout', {
-      pageTitle: 'Checkout',
-      path: '/checkout',
-    });
-  });
+exports.postOrder = (req, res, next) => {
+  let fetchedProducts;
+  let fetchedCart;
+  req.user
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart;
+      return cart.getProducts();
+    })
+    .then((products) => {
+      fetchedProducts = products;
+      return req.user.createOrder();
+    })
+    .then((order) => {
+      order.addProducts(
+        fetchedProducts.map((product) => {
+          product.orderItem = { quantity: product.cartItem.quantity };
+          return product;
+        })
+      );
+    })
+    .then(() => {
+      return fetchedCart.setProducts(null);
+    })
+    .then(() => {
+      res.redirect('/orders');
+    })
+    .catch((err) => console.error(err));
 };
