@@ -1,17 +1,5 @@
 const Product = require('../models/product');
 
-exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
-    .then((products) => {
-      res.render('admin/products', {
-        prods: products,
-        pageTitle: 'Admin Products',
-        path: 'admin/products',
-      });
-    })
-    .catch((err) => console.error(err));
-};
-
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
@@ -22,10 +10,12 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, imageUrl, price, description } = req.body;
-  const product = new Product(title, price, description, imageUrl);
-
-  product
-    .save()
+  /**
+   * Having set a "hasMany" reletionship between User and Product
+   * Sequelize automatically creates this static method for creating products
+   */
+  req.user
+    .createProduct({ title, price, imageUrl, description })
     .then(() => {
       console.log('Product created!');
       res.redirect('/admin/products');
@@ -41,11 +31,15 @@ exports.getEditProduct = (req, res, next) => {
   }
 
   const productId = req.params.productId;
-  Product.findById(productId)
-    .then((product) => {
-      if (!product) {
+  req.user
+    .getProducts({ where: { id: productId } })
+    // Product.findByPk(productId)
+    .then((products) => {
+      if (!products || products.length === 0) {
         return res.redirect('/'); // best would be error handling
       }
+
+      const product = products[0];
 
       res.render('admin/edit-product', {
         pageTitle: 'Edit Product',
@@ -66,16 +60,14 @@ exports.postEditProduct = (req, res, next) => {
     imageUrl: updatedImageUrl,
   } = req.body;
 
-  const product = new Product(
-    updatedTitle,
-    updatedPrice,
-    updatedDescription,
-    updatedImageUrl,
-    productId
-  );
-
-  product
-    .save()
+  Product.findByPk(productId)
+    .then((product) => {
+      product.title = updatedTitle;
+      product.price = updatedPrice;
+      product.description = updatedDescription;
+      product.imageUrl = updatedImageUrl;
+      return product.save();
+    })
     .then(() => {
       console.log('Updated product!');
       res.redirect('/admin/products');
@@ -85,9 +77,26 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
-  Product.deleteById(productId)
+  Product.findByPk(productId)
+    .then((product) => {
+      return product.destroy();
+    })
     .then(() => {
+      console.log(`Deleted product with id: ${productId}!`);
       res.redirect('/admin/products');
+    })
+    .catch((err) => console.error(err));
+};
+
+exports.getProducts = (req, res, next) => {
+  req.user
+    .getProducts()
+    .then((products) => {
+      res.render('admin/products', {
+        prods: products,
+        pageTitle: 'Admin Products',
+        path: 'admin/products',
+      });
     })
     .catch((err) => console.error(err));
 };

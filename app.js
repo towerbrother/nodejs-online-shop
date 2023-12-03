@@ -3,12 +3,12 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-// const adminRoutes = require('./routes/admin');
-// const shopRoutes = require('./routes/shop');
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
 const environment = require('./util/environment');
 // const sequelize = require('./util/database');
-const mongoConnect = require('./util/database');
+const { mongoConnect } = require('./util/database');
 
 // const Product = require('./models/product');
 // const User = require('./models/user');
@@ -42,11 +42,11 @@ app.use((req, res, next) => {
   //     next();
   //   })
   //   .catch((err) => console.error(err));
+  next();
 });
 
-// TEMP
-// app.use('/admin', adminRoutes);
-// app.use(shopRoutes);
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
 
 app.use(errorController.get404);
 
@@ -88,8 +88,7 @@ app.use(errorController.get404);
 //   })
 //   .catch((err) => console.error(err));
 
-mongoConnect((client) => {
-  console.log(client);
+mongoConnect(() => {
   // we want to run our application only if the connection to the DB is successful
   // and if a user is there - currently only dummy user with no authentication
   app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));

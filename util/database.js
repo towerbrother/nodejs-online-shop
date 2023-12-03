@@ -21,15 +21,30 @@ const {
 
 const { MongoClient } = require('mongodb');
 
+// underscore signifies only that it is an internal variable
+let _db;
+
 const mongoConnect = (callback) => {
   MongoClient.connect(
     `mongodb+srv://${user}:${password}@cluster0.tueqxki.mongodb.net/?retryWrites=true&w=majority`
   )
     .then((client) => {
       console.log('Connected to MongoDB');
-      callback(client);
+      _db = client.db();
+      callback();
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      console.error(err);
+      throw err;
+    });
 };
 
-module.exports = mongoConnect;
+const getDb = () => {
+  if (_db) {
+    return _db;
+  }
+  throw 'No DB found!';
+};
+
+exports.mongoConnect = mongoConnect;
+exports.getDb = getDb;
