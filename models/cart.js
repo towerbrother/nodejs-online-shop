@@ -1,14 +1,3 @@
-const Sequelize = require('sequelize');
-
-const sequelize = require('../util/database');
-
-const Cart = sequelize.define('cart', {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true,
-  },
-});
-
-module.exports = Cart;
+// I do not need a cart model
+// I can store cart information as embedded document rather than a reference
+// teh reason is that there is a strict 1-2-1 relationship between user and cart
