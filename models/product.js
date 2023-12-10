@@ -23,9 +23,7 @@ class Product {
     } else {
       dbOperation = db.collection(COLLECTION).insertOne(this);
     }
-    return dbOperation
-      .then((result) => console.log(result))
-      .catch((err) => console.error(err));
+    return dbOperation.then(() => {}).catch((err) => console.error(err));
   }
 
   static fetchAll() {
@@ -35,7 +33,6 @@ class Product {
       .find()
       .toArray() // toArray() to be used only for small amount of items (alternative is pagination)
       .then((products) => {
-        console.log(products);
         return products;
       })
       .catch((err) => console.error(err));
@@ -48,7 +45,6 @@ class Product {
       .find({ _id: new ObjectId(productId) })
       .next() // mogoDb will still return a cursor and therefore I need to select the file (that I know is unique)
       .then((product) => {
-        console.log(product);
         return product;
       })
       .catch((err) => console.error(err));

@@ -40,10 +40,9 @@ exports.getProduct = (req, res, next) => {
 exports.getCart = (req, res, next) => {
   req.user
     .getCart()
-    .then((cart) => {
-      return cart.getProducts();
-    })
+    // .then((cart) => cart.getProducts()) // fossil from SQL
     .then((products) => {
+      console.log(products);
       res.render('shop/cart', {
         pageTitle: 'Your Cart',
         path: '/cart',

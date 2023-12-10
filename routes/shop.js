@@ -15,7 +15,7 @@ router.get('/products', shopController.getProducts);
 // the more specific route should come first
 router.get('/products/:productId', shopController.getProduct);
 
-// router.get('/cart', shopController.getCart);
+router.get('/cart', shopController.getCart);
 
 router.post('/cart', shopController.postCart);
 
