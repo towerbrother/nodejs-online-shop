@@ -3,12 +3,13 @@ const { getDb } = require('../util/database');
 
 const COLLECTION = 'products';
 class Product {
-  constructor(title, price, description, imageUrl, id) {
+  constructor(title, price, description, imageUrl, id, userId) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
     this._id = id ? new ObjectId(id) : null; // id is an optional argument
+    this.userId = userId;
   }
 
   save() {

@@ -9,6 +9,7 @@ const errorController = require('./controllers/error');
 const environment = require('./util/environment');
 // const sequelize = require('./util/database');
 const { mongoConnect } = require('./util/database');
+const User = require('./models/user');
 
 // const Product = require('./models/product');
 // const User = require('./models/user');
@@ -34,15 +35,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  // User.findByPk(1)
-  //   .then((user) => {
-  //     // sequelize object
-  //     // we call call sequelize methods on the object now stored in the request
-  //     req.user = user;
-  //     next();
-  //   })
-  //   .catch((err) => console.error(err));
-  next();
+  User.findById('65760835808c436fdd2f4c80')
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.error(err));
 });
 
 app.use('/admin', adminRoutes);
