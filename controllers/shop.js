@@ -115,7 +115,8 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
   req.user
-    .getOrders({ include: ['products'] }) // it instructs sequelize to return an array of products within the order
+    // .getOrders({ include: ['products'] }) // it instructs sequelize to return an array of products within the order
+    .getOrders()
     .then((orders) => {
       res.render('shop/orders', {
         pageTitle: 'Your Orders',
@@ -127,29 +128,30 @@ exports.getOrders = (req, res, next) => {
 };
 
 exports.postOrder = (req, res, next) => {
-  let fetchedProducts;
-  let fetchedCart;
+  // let fetchedProducts;
+  // let fetchedCart;
   req.user
-    .getCart()
-    .then((cart) => {
-      fetchedCart = cart;
-      return cart.getProducts();
-    })
-    .then((products) => {
-      fetchedProducts = products;
-      return req.user.createOrder();
-    })
-    .then((order) => {
-      order.addProducts(
-        fetchedProducts.map((product) => {
-          product.orderItem = { quantity: product.cartItem.quantity };
-          return product;
-        })
-      );
-    })
-    .then(() => {
-      return fetchedCart.setProducts(null);
-    })
+    .addOrder()
+    // .getCart()
+    // .then((cart) => {
+    //   fetchedCart = cart;
+    //   return cart.getProducts();
+    // })
+    // .then((products) => {
+    //   fetchedProducts = products;
+    //   return req.user.createOrder();
+    // })
+    // .then((order) => {
+    //   order.addProducts(
+    //     fetchedProducts.map((product) => {
+    //       product.orderItem = { quantity: product.cartItem.quantity };
+    //       return product;
+    //     })
+    //   );
+    // })
+    // .then(() => {
+    //   return fetchedCart.setProducts(null);
+    // })
     .then(() => {
       res.redirect('/orders');
     })

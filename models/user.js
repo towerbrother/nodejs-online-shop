@@ -87,6 +87,38 @@ class User {
       );
   }
 
+  getOrders() {
+    const db = getDb();
+    return db
+      .collection('orders')
+      .find({ 'user._id': new ObjectId(this._id) })
+      .toArray();
+  }
+
+  addOrder() {
+    const db = getDb();
+    const { cart, ...rest } = this;
+    return this.getCart()
+      .then((products) => {
+        const order = {
+          items: products,
+          user: rest,
+        };
+        return db.collection('orders').insertOne(order);
+      })
+      .then(() => {
+        const emptyCart = { items: [] };
+        this.cart = emptyCart;
+        return db
+          .collection('users')
+          .updateOne(
+            { _id: new ObjectId(this._id) },
+            { $set: { cart: emptyCart } }
+          );
+      })
+      .catch((err) => console.error(err));
+  }
+
   static findById(userId) {
     const db = getDb();
     return db.collection('users').findOne({ _id: new ObjectId(userId) });
