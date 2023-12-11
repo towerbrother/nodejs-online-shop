@@ -2,42 +2,35 @@ const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
-const adminRoutes = require('./routes/admin');
-const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error');
 const environment = require('./util/environment');
-// const sequelize = require('./util/database');
-const { mongoConnect } = require('./util/database');
+
 const User = require('./models/user');
 
-// const Product = require('./models/product');
-// const User = require('./models/user');
-// const Cart = require('./models/cart');
-// const CartItem = require('./models/cart-item');
-// const Order = require('./models/order');
-// const OrderItem = require('./models/order-item');
+const {
+  db: { user, password },
+  port,
+} = environment;
+
+const PORT = port || 3001;
 
 const app = express();
 
-const PORT = environment.port || 3001;
-
-/**
- * When running "npm start" each one of these middlewares are only
- * registered as functions but they are not executed.
- * They are executed only when an incoming request comes.
- */
-
 app.set('view engine', 'ejs');
 app.set('views', 'views');
+
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  User.findById('657610a21418982fbda4ad4f')
+  User.findById('65771963f2af414a41ba9115')
     .then((user) => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;
       next();
     })
     .catch((err) => console.error(err));
@@ -48,46 +41,25 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-// Product.belongsTo(User, { constraints: true, onDelete: 'CASCADE' }); // user creates a product
-// User.hasMany(Product);
-
-// Cart.belongsTo(User);
-// User.hasOne(Cart);
-
-// Cart.belongsToMany(Product, { through: CartItem });
-// Product.belongsToMany(Cart, { through: CartItem });
-
-// Order.belongsTo(User);
-// User.hasMany(Order);
-// Order.belongsToMany(Product, { through: OrderItem });
-
-// sequelize
-//   // .sync({ force: true }) // ONLY DEVELOPMENT
-//   .sync()
-//   .then(() => {
-//     return User.findByPk(1); // dummy user
-//   })
-//   .then((user) => {
-//     if (!user) {
-//       return User.create({ name: 'Tower', email: 'tower@email.com' });
-//     }
-
-//     return Promise.resolve(user); // not strictly necessary
-//   })
-//   .then((user) => {
-//     console.log(`Created User ${user}`);
-//     return user.createCart();
-//   })
-//   .then((cart) => {
-//     console.log(`Created cart`);
-//     // we want to run our application only if the connection to the DB is successful
-//     // and if a user is there - currently only dummy user with no authentication
-//     app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
-//   })
-//   .catch((err) => console.error(err));
-
-mongoConnect(() => {
-  // we want to run our application only if the connection to the DB is successful
-  // and if a user is there - currently only dummy user with no authentication
-  app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
-});
+mongoose
+  .connect(
+    `mongodb+srv://${user}:${password}@cluster0.tueqxki.mongodb.net/shop?retryWrites=true&w=majority`
+  )
+  .then(() => {
+    User.findOne().then((user) => {
+      if (!user) {
+        const user = new User({
+          name: 'Tower',
+          email: 'tower@test.com',
+          cart: {
+            items: [],
+          },
+        });
+        user.save();
+      }
+    });
+    app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
+  })
+  .catch((err) => {
+    console.error(err);
+  });
