@@ -34,7 +34,6 @@ exports.postAddProduct = (req, res, next) => {
   product
     .save()
     .then(() => {
-      console.log('Product created!');
       res.redirect('/admin/products');
     })
     .catch((err) => console.error(err));
@@ -84,7 +83,6 @@ exports.postEditProduct = (req, res, next) => {
   product
     .save()
     .then(() => {
-      console.log('Updated product!');
       res.redirect('/admin/products');
     })
     .catch((err) => console.error(err));

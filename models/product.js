@@ -57,7 +57,7 @@ class Product {
       return db
         .collection(COLLECTION)
         .deleteOne({ _id: new ObjectId(productId) })
-        .then(() => console.log(`Deleted product with id: ${productId}!`))
+        .then(() => {})
         .catch((err) => console.error(err));
     }
   }

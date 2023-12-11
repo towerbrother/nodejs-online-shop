@@ -42,7 +42,6 @@ exports.getCart = (req, res, next) => {
     .getCart()
     // .then((cart) => cart.getProducts()) // fossil from SQL
     .then((products) => {
-      console.log(products);
       res.render('shop/cart', {
         pageTitle: 'Your Cart',
         path: '/cart',
@@ -96,20 +95,20 @@ exports.postCart = (req, res, next) => {
 exports.postCartDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
   req.user
-    .getCart()
-    .then((cart) => {
-      return cart.getProducts({ where: { id: productId } });
-    })
-    .then((products) => {
-      let product;
-      if (products.length > 0) {
-        product = products[0];
-      }
+    .deleteItemFromCart(productId)
+    // .then((cart) => {
+    //   return cart.getProducts({ where: { id: productId } });
+    // })
+    // .then((products) => {
+    //   let product;
+    //   if (products.length > 0) {
+    //     product = products[0];
+    //   }
 
-      if (product) {
-        return product.cartItem.destroy();
-      }
-    })
+    //   if (product) {
+    //     return product.cartItem.destroy();
+    //   }
+    // })
     .then(() => res.redirect('/cart'))
     .catch((err) => console.error(err));
 };
