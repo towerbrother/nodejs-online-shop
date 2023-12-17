@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const session = require('express-session');
 
 const errorController = require('./controllers/error');
 const environment = require('./util/environment');
@@ -12,6 +13,7 @@ const User = require('./models/user');
 const {
   db: { user, password },
   port,
+  sessionSecretSalt,
 } = environment;
 
 const PORT = port || 3001;
@@ -27,6 +29,13 @@ const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+  session({
+    secret: sessionSecretSalt,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 app.use((req, res, next) => {
   User.findById('65771963f2af414a41ba9115')
