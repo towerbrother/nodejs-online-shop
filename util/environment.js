@@ -7,5 +7,6 @@ module.exports = {
   db: {
     user: dotenv.MONGO_DB_USER,
     password: dotenv.MONGO_DB_PASSWORD,
+    dbName: dotenv.MONGO_DB_DATABASE_NAME,
   },
 };

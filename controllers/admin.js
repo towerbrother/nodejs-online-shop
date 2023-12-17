@@ -5,6 +5,7 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
     editing: false,
+    isAuthenticated: req.session.isLoggedIn,
   });
 };
 
@@ -13,30 +14,39 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+
+  const sessionUser = req.session.user;
+
+  if (!sessionUser) {
+    res.redirect('/login');
+  }
+
   const product = new Product({
     title: title,
     price: price,
     description: description,
     imageUrl: imageUrl,
-    userId: req.user,
+    userId: sessionUser,
   });
+
   product
     .save()
     .then(() => {
       console.log('CREATED PRODUCT');
       res.redirect('/admin/products');
     })
-    .catch((err) => {
-      console.error(err);
-    });
+    .catch((err) => console.error(err));
 };
 
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit;
+
   if (!editMode) {
     return res.redirect('/');
   }
+
   const prodId = req.params.productId;
+
   Product.findById(prodId)
     .then((product) => {
       if (!product) {
@@ -46,7 +56,8 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         editing: editMode,
-        product: product,
+        product,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
@@ -65,6 +76,7 @@ exports.postEditProduct = (req, res, next) => {
       product.price = updatedPrice;
       product.description = updatedDesc;
       product.imageUrl = updatedImageUrl;
+
       return product.save();
     })
     .then(() => {
@@ -81,6 +93,7 @@ exports.getProducts = (req, res, next) => {
         prods: products,
         pageTitle: 'Admin Products',
         path: '/admin/products',
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => console.error(err));
@@ -88,6 +101,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
+
   Product.findByIdAndDelete(prodId)
     .then(() => {
       console.log('DESTROYED PRODUCT');
