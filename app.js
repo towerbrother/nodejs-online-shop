@@ -24,7 +24,6 @@ const MONGO_DB_URI = `mongodb+srv://${user}:${password}@cluster0.tueqxki.mongodb
 const app = express();
 const store = new MongoDBStore({
   uri: MONGO_DB_URI,
-  databaseName: dbName,
   collection: 'sessions',
 });
 
@@ -46,6 +45,18 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user._id)
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => console.log(err));
+});
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -54,7 +65,7 @@ app.use(errorController.get404);
 
 mongoose
   .connect(MONGO_DB_URI)
-  .then(() => {
+  .then((result) => {
     User.findOne().then((user) => {
       if (!user) {
         const user = new User({
@@ -70,4 +81,6 @@ mongoose
 
     app.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
   })
-  .catch((err) => console.error(err));
+  .catch((err) => {
+    console.log(err);
+  });
